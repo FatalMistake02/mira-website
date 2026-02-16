@@ -195,6 +195,10 @@ h2 {
   gap: 1rem;
 }
 
+.download-card.inapplicable {
+  opacity: 0.55;
+}
+
 code {
   display: inline-block;
   margin-top: 0.45rem;
@@ -232,6 +236,10 @@ code {
 .btn-ghost {
   border-color: var(--line);
   background: color-mix(in srgb, var(--ghost-bg) 70%, var(--bg));
+}
+
+.download-card.inapplicable a.btn-ghost:hover {
+  border-color: color-mix(in srgb, var(--line) 78%, var(--text));
 }
 
 @media (max-width: 900px) {

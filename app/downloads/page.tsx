@@ -1,4 +1,5 @@
 import { PrereleaseToggle } from "./prerelease-toggle";
+import { DownloadCards } from "./download-cards";
 
 type ReleaseAsset = {
   name: string;
@@ -19,6 +20,7 @@ type GitHubRelease = {
 
 type DownloadSlot = {
   label: string;
+  platform: "windows" | "mac";
   asset: ReleaseAsset | null;
 };
 
@@ -124,18 +126,22 @@ function buildDownloadSlots(release: GitHubRelease): {
   return {
     windowsInstaller: {
       label: "Windows Installer",
+      platform: "windows",
       asset: chooseBestAsset(windowsInstallerAssets, ["setup", ".msi", ".exe"]),
     },
     windowsPortable: {
       label: "Windows Portable",
+      platform: "windows",
       asset: chooseBestAsset(windowsPortableAssets, ["portable", ".exe", ".zip"]),
     },
     macInstaller: {
       label: "macOS Installer",
+      platform: "mac",
       asset: chooseBestAsset(macInstallerAssets, ["dmg", "pkg"]),
     },
     macPortable: {
       label: "macOS Portable",
+      platform: "mac",
       asset: chooseBestAsset(macPortableAssets, ["portable", ".zip", ".tar.gz"]),
     },
   };
@@ -227,23 +233,14 @@ export default async function DownloadsPage({ searchParams }: PageProps) {
             </div>
 
             <div className="download-list">
-              {[slots.windowsInstaller, slots.windowsPortable, slots.macInstaller, slots.macPortable].map((slot) => (
-                <article key={slot.label} className="download-card">
-                  <div>
-                    <h2>{slot.label}</h2>
-                    {slot.asset ? <code>{slot.asset.name}</code> : <p className="muted-note">Not available in this release.</p>}
-                  </div>
-                  {slot.asset ? (
-                    <a href={slot.asset.browser_download_url} className="btn btn-primary" target="_blank" rel="noreferrer">
-                      Download
-                    </a>
-                  ) : (
-                    <span className="btn btn-ghost" aria-disabled="true">
-                      Unavailable
-                    </span>
-                  )}
-                </article>
-              ))}
+              <DownloadCards
+                slots={[
+                  slots.windowsInstaller,
+                  slots.windowsPortable,
+                  slots.macInstaller,
+                  slots.macPortable,
+                ]}
+              />
             </div>
           </>
         )}
