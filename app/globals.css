@@ -238,6 +238,10 @@ code {
   background: color-mix(in srgb, var(--ghost-bg) 70%, var(--bg));
 }
 
+.download-card.inapplicable a.btn-ghost:hover {
+  border-color: color-mix(in srgb, var(--line) 78%, var(--text));
+}
+
 @media (max-width: 900px) {
   .hero-grid,
   .feature-grid {
