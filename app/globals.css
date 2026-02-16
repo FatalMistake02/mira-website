@@ -195,6 +195,10 @@ h2 {
   gap: 1rem;
 }
 
+.download-card.inapplicable {
+  opacity: 0.55;
+}
+
 code {
   display: inline-block;
   margin-top: 0.45rem;
