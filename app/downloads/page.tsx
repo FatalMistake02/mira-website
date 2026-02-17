@@ -20,7 +20,7 @@ type GitHubRelease = {
 
 type DownloadSlot = {
   label: string;
-  platform: "windows" | "mac";
+  platform: "windows" | "mac-arm64" | "mac-x64";
   asset: ReleaseAsset | null;
 };
 
@@ -55,6 +55,24 @@ function isMacAsset(name: string): boolean {
     lower.endsWith(".dmg") ||
     lower.endsWith(".pkg")
   );
+}
+
+function getMacAssetArchitecture(name: string): "arm64" | "x64" | "unknown" {
+  const lower = name.toLowerCase();
+
+  if (
+    /\b(arm64|aarch64)\b/.test(lower) ||
+    lower.includes("apple-silicon") ||
+    lower.includes("apple_silicon")
+  ) {
+    return "arm64";
+  }
+
+  if (/\b(x64|x86_64|amd64)\b/.test(lower) || /\bintel\b/.test(lower)) {
+    return "x64";
+  }
+
+  return "unknown";
 }
 
 function isInstallerAsset(name: string): boolean {
@@ -109,8 +127,8 @@ function chooseBestAsset(assets: ReleaseAsset[], preferredTerms: string[]): Rele
 function buildDownloadSlots(release: GitHubRelease): {
   windowsInstaller: DownloadSlot;
   windowsPortable: DownloadSlot;
-  macInstaller: DownloadSlot;
-  macPortable: DownloadSlot;
+  macArm64: DownloadSlot;
+  macX64: DownloadSlot;
 } {
   const assets = release.assets.filter((asset) => isDownloadableAsset(asset.name));
 
@@ -120,8 +138,11 @@ function buildDownloadSlots(release: GitHubRelease): {
   const windowsInstallerAssets = windowsAssets.filter((asset) => isInstallerAsset(asset.name));
   const windowsPortableAssets = windowsAssets.filter((asset) => isPortableAsset(asset.name));
 
-  const macInstallerAssets = macAssets.filter((asset) => isInstallerAsset(asset.name));
-  const macPortableAssets = macAssets.filter((asset) => isPortableAsset(asset.name));
+  const macArm64Assets = macAssets.filter((asset) => getMacAssetArchitecture(asset.name) === "arm64");
+  const macX64Assets = macAssets.filter((asset) => getMacAssetArchitecture(asset.name) === "x64");
+  const macUnknownArchAssets = macAssets.filter(
+    (asset) => getMacAssetArchitecture(asset.name) === "unknown",
+  );
 
   return {
     windowsInstaller: {
@@ -134,15 +155,21 @@ function buildDownloadSlots(release: GitHubRelease): {
       platform: "windows",
       asset: chooseBestAsset(windowsPortableAssets, ["portable", ".exe", ".zip"]),
     },
-    macInstaller: {
-      label: "macOS Installer",
-      platform: "mac",
-      asset: chooseBestAsset(macInstallerAssets, ["dmg", "pkg"]),
+    macArm64: {
+      label: "macOS (Apple Silicon)",
+      platform: "mac-arm64",
+      asset: chooseBestAsset(
+        macArm64Assets.length > 0 ? macArm64Assets : macUnknownArchAssets,
+        ["dmg", "pkg", "portable", ".zip", ".tar.gz"],
+      ),
     },
-    macPortable: {
-      label: "macOS Portable",
-      platform: "mac",
-      asset: chooseBestAsset(macPortableAssets, ["portable", ".zip", ".tar.gz"]),
+    macX64: {
+      label: "macOS (Intel)",
+      platform: "mac-x64",
+      asset: chooseBestAsset(
+        macX64Assets.length > 0 ? macX64Assets : macUnknownArchAssets,
+        ["dmg", "pkg", "portable", ".zip", ".tar.gz"],
+      ),
     },
   };
 }
@@ -236,8 +263,8 @@ export default async function DownloadsPage({ searchParams }: PageProps) {
                 slots={[
                   slots.windowsInstaller,
                   slots.windowsPortable,
-                  slots.macInstaller,
-                  slots.macPortable,
+                  slots.macArm64,
+                  slots.macX64,
                 ]}
               />
             </div>
