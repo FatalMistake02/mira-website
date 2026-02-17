@@ -127,8 +127,10 @@ function chooseBestAsset(assets: ReleaseAsset[], preferredTerms: string[]): Rele
 function buildDownloadSlots(release: GitHubRelease): {
   windowsInstaller: DownloadSlot;
   windowsPortable: DownloadSlot;
-  macArm64: DownloadSlot;
-  macX64: DownloadSlot;
+  macArm64Installer: DownloadSlot;
+  macArm64Portable: DownloadSlot;
+  macX64Installer: DownloadSlot;
+  macX64Portable: DownloadSlot;
 } {
   const assets = release.assets.filter((asset) => isDownloadableAsset(asset.name));
 
@@ -144,6 +146,13 @@ function buildDownloadSlots(release: GitHubRelease): {
     (asset) => getMacAssetArchitecture(asset.name) === "unknown",
   );
 
+  const macArm64InstallerAssets = macArm64Assets.filter((asset) => isInstallerAsset(asset.name));
+  const macArm64PortableAssets = macArm64Assets.filter((asset) => isPortableAsset(asset.name));
+  const macX64InstallerAssets = macX64Assets.filter((asset) => isInstallerAsset(asset.name));
+  const macX64PortableAssets = macX64Assets.filter((asset) => isPortableAsset(asset.name));
+  const macUnknownInstallerAssets = macUnknownArchAssets.filter((asset) => isInstallerAsset(asset.name));
+  const macUnknownPortableAssets = macUnknownArchAssets.filter((asset) => isPortableAsset(asset.name));
+
   return {
     windowsInstaller: {
       label: "Windows Installer",
@@ -155,20 +164,36 @@ function buildDownloadSlots(release: GitHubRelease): {
       platform: "windows",
       asset: chooseBestAsset(windowsPortableAssets, ["portable", ".exe", ".zip"]),
     },
-    macArm64: {
-      label: "macOS (Apple Silicon)",
+    macArm64Installer: {
+      label: "macOS (Apple Silicon) Installer",
       platform: "mac-arm64",
       asset: chooseBestAsset(
-        macArm64Assets.length > 0 ? macArm64Assets : macUnknownArchAssets,
-        ["dmg", "pkg", "portable", ".zip", ".tar.gz"],
+        macArm64InstallerAssets.length > 0 ? macArm64InstallerAssets : macUnknownInstallerAssets,
+        ["dmg", "pkg"],
       ),
     },
-    macX64: {
-      label: "macOS (Intel)",
+    macArm64Portable: {
+      label: "macOS (Apple Silicon) Portable",
+      platform: "mac-arm64",
+      asset: chooseBestAsset(
+        macArm64PortableAssets.length > 0 ? macArm64PortableAssets : macUnknownPortableAssets,
+        ["portable", ".zip", ".tar.gz"],
+      ),
+    },
+    macX64Installer: {
+      label: "macOS (Intel) Installer",
       platform: "mac-x64",
       asset: chooseBestAsset(
-        macX64Assets.length > 0 ? macX64Assets : macUnknownArchAssets,
-        ["dmg", "pkg", "portable", ".zip", ".tar.gz"],
+        macX64InstallerAssets.length > 0 ? macX64InstallerAssets : macUnknownInstallerAssets,
+        ["dmg", "pkg"],
+      ),
+    },
+    macX64Portable: {
+      label: "macOS (Intel) Portable",
+      platform: "mac-x64",
+      asset: chooseBestAsset(
+        macX64PortableAssets.length > 0 ? macX64PortableAssets : macUnknownPortableAssets,
+        ["portable", ".zip", ".tar.gz"],
       ),
     },
   };
@@ -263,8 +288,10 @@ export default async function DownloadsPage({ searchParams }: PageProps) {
                 slots={[
                   slots.windowsInstaller,
                   slots.windowsPortable,
-                  slots.macArm64,
-                  slots.macX64,
+                  slots.macArm64Installer,
+                  slots.macArm64Portable,
+                  slots.macX64Installer,
+                  slots.macX64Portable,
                 ]}
               />
             </div>
