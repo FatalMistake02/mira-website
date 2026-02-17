@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Solitreo } from "next/font/google";
+import { ThemeHeroImage } from "./theme-hero-image";
 
 const solitreo = Solitreo({
   subsets: ["latin"],
@@ -26,42 +26,34 @@ export default function Home() {
   return (
     <main>
       <section className="hero">
-        <div className="container hero-grid">
-          <div>
-            <h1>
-              <span className={solitreo.className} style={{fontSize:"55px"}}>mira</span> is an open source
-              desktop browser built with Electron + React.
-            </h1>
-            <p className="lead">
-              The code is public and actively developed. Download the latest build
-              or review the project source.
-            </p>
-            <p className="muted-note">
-              Mira is inspired by the Japanese word 未来 (mirai), meaning
-              “future.”
-            </p>
-            <div className="cta-row">
-              <Link href="/downloads" className="btn btn-primary">
-                Download Mira
-              </Link>
-              <a
-                href="https://github.com/FatalMistake02/mira"
-                className="btn btn-ghost"
-                target="_blank"
-                rel="noreferrer"
-              >
-                View Source
-              </a>
+        <div className="container">
+          <div className="hero-stack">
+            <div className="hero-copy">
+              <h1>
+                <span className={solitreo.className} style={{fontSize:"55px"}}>mira</span> is an open source
+                desktop browser that helps you get everything done
+              </h1>
+              <p className="muted-note">
+                Mira is inspired by the Japanese word 未来 (mirai), meaning
+                “future.”
+              </p>
+              <div className="cta-row">
+                <Link href="/downloads" className="btn btn-primary">
+                  Download Mira
+                </Link>
+                <a
+                  href="https://github.com/FatalMistake02/mira"
+                  className="btn btn-ghost"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View Source
+                </a>
+              </div>
             </div>
-          </div>
-          <div className="hero-card">
-            <Image
-              src="/assets/mira_logo.png"
-              alt="Mira logo"
-              width={800}
-              height={400}
-              priority
-            />
+            <div className="hero-card hero-card--app">
+              <ThemeHeroImage />
+            </div>
           </div>
         </div>
       </section>

@@ -122,19 +122,51 @@ a {
   padding: 4rem 0 3rem;
 }
 
-.hero-grid {
-  display: grid;
-  gap: 2rem;
-  grid-template-columns: 1.2fr 1fr;
-  align-items: center;
+.hero-stack {
+  position: relative;
+  min-height: 560px;
+}
+
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 720px;
+  padding-right: 0.5rem;
+  transform: translateY(36px);
+  position: relative;
+  z-index: 2;
 }
 
 .hero-card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: 12px;
   padding: 1.25rem;
   box-shadow: 0 12px 40px rgb(2 6 23 / 0.08);
+}
+
+.hero-card.hero-card--app {
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: 0 14px 30px rgb(2 6 23 / 0.16);
+  overflow: hidden;
+  border-radius: 6px;
+  width: min(980px, 74vw);
+  position: absolute;
+  top: -40px;
+  right: -132px;
+  z-index: 1;
+  transform: none;
+}
+
+.hero-app-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--line) 65%, transparent);
 }
 
 .eyebrow {
@@ -242,8 +274,24 @@ code {
   border-color: color-mix(in srgb, var(--line) 78%, var(--text));
 }
 
-@media (max-width: 900px) {
-  .hero-grid,
+@media (max-width: 520px) {
+  .hero-stack {
+    min-height: unset;
+  }
+
+  .hero-copy {
+    max-width: none;
+    padding-right: 0;
+    transform: none;
+  }
+
+  .hero-card.hero-card--app {
+    position: static;
+    width: min(820px, 100%);
+    margin: 0 auto;
+    transform: none;
+  }
+
   .feature-grid {
     grid-template-columns: 1fr;
   }
