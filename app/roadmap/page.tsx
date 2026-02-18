@@ -1,12 +1,6 @@
 import type { Metadata } from "next";
 import { getSiteUrl } from "@/lib/site-url";
 
-type GitHubRelease = {
-  tag_name: string;
-  prerelease: boolean;
-  draft: boolean;
-};
-
 type ParsedSemver = {
   major: number;
   minor: number;
@@ -24,11 +18,9 @@ type RoadmapMilestone = {
   items: RoadmapItem[];
 };
 
-type UpcomingReleasePlan = {
-  nextVersionHeading: string;
-  items: string[];
+type RoadmapPlan = {
+  milestones: RoadmapMilestone[];
   sourceUrl: string | null;
-  hasNextVersion: boolean;
 } | null;
 
 const REPO_OWNER = "FatalMistake02";
@@ -90,66 +82,6 @@ function parseRoadmapMarkdown(markdown: string): RoadmapMilestone[] {
   return milestones;
 }
 
-async function fetchCurrentStableVersion(): Promise<ParsedSemver | null> {
-  const latestResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest`, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "User-Agent": "mira-website",
-    },
-    next: { revalidate: 300 },
-  });
-
-  if (latestResponse.ok) {
-    const latest = (await latestResponse.json()) as GitHubRelease;
-    const latestVersion = parseSemver(latest.tag_name);
-    if (latestVersion) {
-      return latestVersion;
-    }
-  }
-
-  const releasesResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases?per_page=10`, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "User-Agent": "mira-website",
-    },
-    next: { revalidate: 300 },
-  });
-
-  if (releasesResponse.ok) {
-    const releases = (await releasesResponse.json()) as GitHubRelease[];
-    const stableRelease = releases.find((release) => !release.prerelease && !release.draft);
-
-    if (stableRelease) {
-      const stableVersion = parseSemver(stableRelease.tag_name);
-      if (stableVersion) {
-        return stableVersion;
-      }
-    }
-  }
-
-  const latestPageResponse = await fetch(`https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/latest`, {
-    headers: {
-      Accept: "text/html",
-      "User-Agent": "mira-website",
-    },
-    redirect: "follow",
-    next: { revalidate: 300 },
-  });
-
-  if (latestPageResponse.ok) {
-    const resolvedUrl = latestPageResponse.url;
-    const tagMatch = resolvedUrl.match(/\/tag\/([^/?#]+)/i);
-    if (tagMatch) {
-      const parsedFromUrl = parseSemver(tagMatch[1]);
-      if (parsedFromUrl) {
-        return parsedFromUrl;
-      }
-    }
-  }
-
-  return null;
-}
-
 async function fetchRoadmapMarkdown(): Promise<{ markdown: string; sourceUrl: string } | null> {
   const contentsResponse = await fetch(
     `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/ROADMAP.md?ref=main`,
@@ -198,7 +130,7 @@ async function fetchRoadmapMarkdown(): Promise<{ markdown: string; sourceUrl: st
   };
 }
 
-async function fetchUpcomingReleasePlan(): Promise<UpcomingReleasePlan> {
+async function fetchRoadmapPlan(): Promise<RoadmapPlan> {
   try {
     const roadmap = await fetchRoadmapMarkdown();
     if (!roadmap) {
@@ -208,50 +140,14 @@ async function fetchUpcomingReleasePlan(): Promise<UpcomingReleasePlan> {
     const milestones = parseRoadmapMarkdown(roadmap.markdown).sort((a, b) =>
       compareSemver(a.version, b.version),
     );
+
     if (milestones.length === 0) {
       return null;
     }
 
-    const currentVersion = await fetchCurrentStableVersion();
-    let nextMilestone: RoadmapMilestone | undefined;
-
-    if (currentVersion) {
-      nextMilestone = milestones.find((milestone) => compareSemver(milestone.version, currentVersion) > 0);
-
-      if (!nextMilestone) {
-        const firstUpcomingWithWork = milestones.find((milestone) => milestone.items.some((item) => !item.done));
-        if (firstUpcomingWithWork) {
-          const uncheckedFallback = firstUpcomingWithWork.items
-            .filter((item) => !item.done)
-            .map((item) => item.text);
-
-          return {
-            nextVersionHeading: firstUpcomingWithWork.heading,
-            items: uncheckedFallback.length > 0 ? uncheckedFallback : ["No tasks listed for this milestone."],
-            sourceUrl: roadmap.sourceUrl,
-            hasNextVersion: true,
-          };
-        }
-
-        return {
-          nextVersionHeading: "No newer roadmap milestone listed yet",
-          items: ["ROADMAP.md currently has no version higher than the latest stable release."],
-          sourceUrl: roadmap.sourceUrl,
-          hasNextVersion: false,
-        };
-      }
-    } else {
-      nextMilestone = milestones.find((milestone) => milestone.items.some((item) => !item.done)) ?? milestones[0];
-    }
-
-    const uncheckedItems = nextMilestone.items.filter((item) => !item.done).map((item) => item.text);
-    const items = uncheckedItems.length > 0 ? uncheckedItems : nextMilestone.items.map((item) => item.text);
-
     return {
-      nextVersionHeading: nextMilestone.heading,
-      items: items.length > 0 ? items : ["No tasks listed for this milestone."],
+      milestones,
       sourceUrl: roadmap.sourceUrl,
-      hasNextVersion: true,
     };
   } catch {
     return null;
@@ -260,54 +156,82 @@ async function fetchUpcomingReleasePlan(): Promise<UpcomingReleasePlan> {
 
 export const metadata: Metadata = {
   title: "Mira Roadmap",
-  description: "See what is planned for upcoming Mira releases.",
+  description: "See the release roadmap for Mira as a milestone flow.",
   alternates: {
     canonical: `${getSiteUrl()}/roadmap`,
   },
 };
 
 export default async function RoadmapPage() {
-  const upcomingPlan = await fetchUpcomingReleasePlan();
+  const roadmapPlan = await fetchRoadmapPlan();
 
   return (
     <main className="section page-enter">
       <div className="container">
-        <article className="feature-card about-roadmap-header animate-fade-in-scale" style={{ animationDelay: "120ms" }}>
+        <article className="feature-card about-roadmap-header animate-fade-in-scale" style={{ animationDelay: "100ms" }}>
           <div>
             <p className="eyebrow">Roadmap</p>
-            <h1>
-              {upcomingPlan
-                ? upcomingPlan.hasNextVersion
-                  ? `Coming in ${upcomingPlan.nextVersionHeading}`
-                  : upcomingPlan.nextVersionHeading
-                : "What comes next"}
-            </h1>
+            <h1>Release Flow</h1>
           </div>
-          {upcomingPlan?.sourceUrl && (
+          {roadmapPlan?.sourceUrl && (
             <p className="muted-note about-roadmap-source">
               Source:{" "}
-              <a href={upcomingPlan.sourceUrl} target="_blank" rel="noreferrer">
+              <a href={roadmapPlan.sourceUrl} target="_blank" rel="noreferrer">
                 ROADMAP.md on main
               </a>
             </p>
           )}
         </article>
 
-        {upcomingPlan ? (
-          <div className="about-roadmap-grid">
-            {upcomingPlan.items.map((item, idx) => (
-              <article
-                key={item}
-                className="feature-card about-roadmap-item animate-fade-up"
-                style={{ animationDelay: `${180 + idx * 90}ms` }}
-              >
-                <p>{item}</p>
-              </article>
-            ))}
+        {roadmapPlan ? (
+          <div className="roadmap-vertical-flow">
+            {roadmapPlan.milestones.map((milestone, idx) => {
+              const plannedItems = milestone.items.filter((item) => !item.done).map((item) => item.text);
+              const itemsToRender =
+                plannedItems.length > 0 ? plannedItems : milestone.items.map((item) => item.text);
+
+              return (
+                <div key={milestone.heading} className="roadmap-version-block">
+                  <article
+                    className="feature-card roadmap-version-header-card animate-fade-up"
+                    style={{ animationDelay: `${160 + idx * 90}ms` }}
+                  >
+                    <h2>{milestone.heading}</h2>
+                  </article>
+
+                  <div className="roadmap-version-items-grid">
+                    {itemsToRender.map((item, itemIdx) => (
+                      <article
+                        key={`${milestone.heading}-${item}`}
+                        className="feature-card roadmap-version-item-card animate-fade-up"
+                        style={{ animationDelay: `${220 + idx * 90 + itemIdx * 70}ms` }}
+                      >
+                        <p>{item}</p>
+                      </article>
+                    ))}
+                  </div>
+
+                  {idx < roadmapPlan.milestones.length - 1 && (
+                    <div className="roadmap-down-arrow" aria-hidden>
+                      <svg viewBox="0 0 160 120" role="presentation">
+                        <defs>
+                          <linearGradient id="roadmapArrow" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#0ea5e9" />
+                            <stop offset="100%" stopColor="#0284c7" />
+                          </linearGradient>
+                        </defs>
+                        <path d="M80 14 L80 76" stroke="url(#roadmapArrow)" strokeWidth="9" strokeLinecap="round" />
+                        <path d="M48 66 L80 100 L112 66" fill="none" stroke="url(#roadmapArrow)" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         ) : (
-          <article className="feature-card about-roadmap-empty animate-fade-up" style={{ animationDelay: "200ms" }}>
-            <p className="muted-note">Couldn&apos;t load next release plans right now. Check back soon.</p>
+          <article className="feature-card about-roadmap-empty animate-fade-up" style={{ animationDelay: "180ms" }}>
+            <p className="muted-note">Couldn&apos;t load roadmap data right now. Check back soon.</p>
           </article>
         )}
       </div>
