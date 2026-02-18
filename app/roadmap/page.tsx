@@ -156,7 +156,7 @@ async function fetchRoadmapPlan(): Promise<RoadmapPlan> {
 
 export const metadata: Metadata = {
   title: "Mira Roadmap",
-  description: "See the release roadmap for Mira as a milestone flow.",
+  description: "See the release roadmap for Mira by version with completion status.",
   alternates: {
     canonical: `${getSiteUrl()}/roadmap`,
   },
@@ -167,65 +167,58 @@ export default async function RoadmapPage() {
 
   return (
     <main className="section page-enter">
-      <div className="container">
-        <article className="feature-card about-roadmap-header animate-fade-in-scale" style={{ animationDelay: "100ms" }}>
-          <div>
-            <p className="eyebrow">Roadmap</p>
-            <h1>Release Flow</h1>
-          </div>
-          {roadmapPlan?.sourceUrl && (
-            <p className="muted-note about-roadmap-source">
-              Source:{" "}
+      <div className="container narrow">
+        <h1 className="animate-fade-up">Roadmap</h1>
+        <p className="lead">Planned work grouped by release version.</p>
+
+        {roadmapPlan?.sourceUrl && (
+          <div className="notice animate-fade-up" style={{ animationDelay: "180ms" }}>
+            <p>
+              Imported from:{" "}
               <a href={roadmapPlan.sourceUrl} target="_blank" rel="noreferrer">
-                ROADMAP.md on main
+                ROADMAP.md on GitHub
               </a>
             </p>
-          )}
-        </article>
+          </div>
+        )}
 
         {roadmapPlan ? (
-          <div className="roadmap-vertical-flow">
+          <div className="roadmap-list">
             {roadmapPlan.milestones.map((milestone, idx) => {
-              const plannedItems = milestone.items.filter((item) => !item.done).map((item) => item.text);
-              const itemsToRender =
-                plannedItems.length > 0 ? plannedItems : milestone.items.map((item) => item.text);
+              const completedCount = milestone.items.filter((item) => item.done).length;
+              const totalCount = milestone.items.length;
 
               return (
-                <div key={milestone.heading} className="roadmap-version-block">
-                  <article
-                    className="feature-card roadmap-version-header-card animate-fade-up"
-                    style={{ animationDelay: `${160 + idx * 90}ms` }}
-                  >
+                <article
+                  key={milestone.heading}
+                  className="roadmap-version-card animate-fade-up"
+                  style={{ animationDelay: `${260 + idx * 90}ms` }}
+                >
+                  <div className="roadmap-version-card-header">
                     <h2>{milestone.heading}</h2>
-                  </article>
-
-                  <div className="roadmap-version-items-grid">
-                    {itemsToRender.map((item, itemIdx) => (
-                      <article
-                        key={`${milestone.heading}-${item}`}
-                        className="feature-card roadmap-version-item-card animate-fade-up"
-                        style={{ animationDelay: `${220 + idx * 90 + itemIdx * 70}ms` }}
-                      >
-                        <p>{item}</p>
-                      </article>
-                    ))}
+                    <p className="muted-note">
+                      {completedCount}/{totalCount} completed
+                    </p>
                   </div>
 
-                  {idx < roadmapPlan.milestones.length - 1 && (
-                    <div className="roadmap-down-arrow" aria-hidden>
-                      <svg viewBox="0 0 160 120" role="presentation">
-                        <defs>
-                          <linearGradient id="roadmapArrow" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#0ea5e9" />
-                            <stop offset="100%" stopColor="#0284c7" />
-                          </linearGradient>
-                        </defs>
-                        <path d="M80 14 L80 76" stroke="url(#roadmapArrow)" strokeWidth="9" strokeLinecap="round" />
-                        <path d="M48 66 L80 100 L112 66" fill="none" stroke="url(#roadmapArrow)" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </div>
+                  {milestone.items.length > 0 ? (
+                    <ul className="roadmap-items-list">
+                      {milestone.items.map((item) => (
+                        <li
+                          key={`${milestone.heading}-${item.text}`}
+                          className={`roadmap-item-row ${item.done ? "is-done" : ""}`}
+                        >
+                          <span className="roadmap-item-status" aria-hidden>
+                            {item.done ? "✓" : ""}
+                          </span>
+                          <span>{item.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="muted-note roadmap-empty-version">No items listed for this version yet.</p>
                   )}
-                </div>
+                </article>
               );
             })}
           </div>
