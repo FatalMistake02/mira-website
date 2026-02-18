@@ -47,6 +47,7 @@ export default function RootLayout({
                   <Link href="/">Home</Link>
                   <Link href="/roadmap">Roadmap</Link>
                   <Link href="/downloads">Downloads</Link>
+                  <Link href="/themes">Themes</Link>
                 </nav>
                 <ThemeToggle />
               </div>
@@ -62,6 +63,7 @@ export default function RootLayout({
                 <Link href="/">Home</Link>
                 <Link href="/roadmap">Roadmap</Link>
                 <Link href="/downloads">Downloads</Link>
+                <Link href="/themes">Themes</Link>
                 <Link href="/privacy">Privacy</Link>
                 <a href="https://github.com/FatalMistake02/mira" target="_blank" rel="noreferrer">
                   GitHub
