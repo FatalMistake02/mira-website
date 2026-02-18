@@ -9,7 +9,7 @@ type SlotAsset = {
 
 type DownloadSlot = {
   label: string;
-  platform: "windows" | "mac-arm64" | "mac-x64";
+  platform: "windows" | "mac-arm64" | "mac-x64" | "linux";
   asset: SlotAsset | null;
 };
 
@@ -17,7 +17,7 @@ type DownloadCardsProps = {
   slots: DownloadSlot[];
 };
 
-type DetectedOS = "windows" | "mac-arm64" | "mac-x64" | "mac" | "other" | "unknown";
+type DetectedOS = "windows" | "mac-arm64" | "mac-x64" | "mac" | "linux" | "other" | "unknown";
 
 function normalizeArchitecture(value: string | undefined, allowX64 = true): "arm64" | "x64" | null {
   if (!value) {
@@ -66,6 +66,9 @@ async function detectOS(): Promise<DetectedOS> {
     if (forced === "mac" || forced === "macos") {
       return "mac";
     }
+    if (forced === "linux") {
+      return "linux";
+    }
   }
 
   const navigatorWithUAData = window.navigator as Navigator & {
@@ -101,6 +104,9 @@ async function detectOS(): Promise<DetectedOS> {
     }
     return "mac";
   }
+  if (fromUserAgentData?.includes("linux")) {
+    return "linux";
+  }
 
   const platform = window.navigator.platform.toLowerCase();
   if (platform.includes("win")) {
@@ -113,6 +119,9 @@ async function detectOS(): Promise<DetectedOS> {
     if (architecture === "x64") {
       return "mac-x64";
     }
+  }
+  if (platform.includes("linux")) {
+    return "linux";
   }
 
   const userAgent = window.navigator.userAgent.toLowerCase();
@@ -128,6 +137,9 @@ async function detectOS(): Promise<DetectedOS> {
       return "mac-x64";
     }
     return "mac";
+  }
+  if (userAgent.includes("linux")) {
+    return "linux";
   }
 
   return "other";
@@ -164,6 +176,10 @@ function getRelevanceScore(slot: DownloadSlot, os: DetectedOS): number {
 
   if (os === "mac") {
     return slot.platform === "windows" ? 2 : 0;
+  }
+
+  if (os === "linux") {
+    return slot.platform === "linux" ? 0 : 2;
   }
 
   return 0;

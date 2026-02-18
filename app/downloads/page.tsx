@@ -20,7 +20,7 @@ type GitHubRelease = {
 
 type DownloadSlot = {
   label: string;
-  platform: "windows" | "mac-arm64" | "mac-x64";
+  platform: "windows" | "mac-arm64" | "mac-x64" | "linux";
   asset: ReleaseAsset | null;
 };
 
@@ -37,7 +37,7 @@ function parseIncludePrereleases(value: string | string[] | undefined): boolean 
 
 function isDownloadableAsset(name: string): boolean {
   const lower = name.toLowerCase();
-  return [".exe", ".msi", ".dmg", ".pkg", ".zip", ".tar.gz"].some((ext) =>
+  return [".exe", ".msi", ".dmg", ".pkg", ".zip", ".tar.gz", ".appimage", ".deb", ".rpm"].some((ext) =>
     lower.endsWith(ext),
   );
 }
@@ -54,6 +54,16 @@ function isMacAsset(name: string): boolean {
     lower.includes("darwin") ||
     lower.endsWith(".dmg") ||
     lower.endsWith(".pkg")
+  );
+}
+
+function isLinuxAsset(name: string): boolean {
+  const lower = name.toLowerCase();
+  return (
+    lower.includes("linux") ||
+    lower.endsWith(".appimage") ||
+    lower.endsWith(".deb") ||
+    lower.endsWith(".rpm")
   );
 }
 
@@ -131,11 +141,15 @@ function buildDownloadSlots(release: GitHubRelease): {
   macArm64Portable: DownloadSlot;
   macX64Installer: DownloadSlot;
   macX64Portable: DownloadSlot;
+  linuxAppImage: DownloadSlot;
+  linuxDeb: DownloadSlot;
+  linuxRpm: DownloadSlot;
 } {
   const assets = release.assets.filter((asset) => isDownloadableAsset(asset.name));
 
   const windowsAssets = assets.filter((asset) => isWindowsAsset(asset.name));
   const macAssets = assets.filter((asset) => isMacAsset(asset.name));
+  const linuxAssets = assets.filter((asset) => isLinuxAsset(asset.name));
 
   const windowsInstallerAssets = windowsAssets.filter((asset) => isInstallerAsset(asset.name));
   const windowsPortableAssets = windowsAssets.filter((asset) => isPortableAsset(asset.name));
@@ -152,6 +166,9 @@ function buildDownloadSlots(release: GitHubRelease): {
   const macX64PortableAssets = macX64Assets.filter((asset) => isPortableAsset(asset.name));
   const macUnknownInstallerAssets = macUnknownArchAssets.filter((asset) => isInstallerAsset(asset.name));
   const macUnknownPortableAssets = macUnknownArchAssets.filter((asset) => isPortableAsset(asset.name));
+  const linuxAppImageAssets = linuxAssets.filter((asset) => asset.name.toLowerCase().endsWith(".appimage"));
+  const linuxDebAssets = linuxAssets.filter((asset) => asset.name.toLowerCase().endsWith(".deb"));
+  const linuxRpmAssets = linuxAssets.filter((asset) => asset.name.toLowerCase().endsWith(".rpm"));
 
   return {
     windowsInstaller: {
@@ -195,6 +212,21 @@ function buildDownloadSlots(release: GitHubRelease): {
         macX64PortableAssets.length > 0 ? macX64PortableAssets : macUnknownPortableAssets,
         ["portable", ".zip", ".tar.gz"],
       ),
+    },
+    linuxAppImage: {
+      label: "Linux AppImage",
+      platform: "linux",
+      asset: chooseBestAsset(linuxAppImageAssets, [".appimage"]),
+    },
+    linuxDeb: {
+      label: "Linux .deb",
+      platform: "linux",
+      asset: chooseBestAsset(linuxDebAssets, [".deb"]),
+    },
+    linuxRpm: {
+      label: "Linux .rpm",
+      platform: "linux",
+      asset: chooseBestAsset(linuxRpmAssets, [".rpm"]),
     },
   };
 }
@@ -292,6 +324,9 @@ export default async function DownloadsPage({ searchParams }: PageProps) {
                   slots.macArm64Portable,
                   slots.macX64Installer,
                   slots.macX64Portable,
+                  slots.linuxAppImage,
+                  slots.linuxDeb,
+                  slots.linuxRpm,
                 ]}
               />
             </div>
