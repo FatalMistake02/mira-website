@@ -16,6 +16,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const year = new Date().getFullYear();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -27,29 +29,53 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <header className="site-header">
-          <div className="container nav-wrap">
-            <Link href="/" className="brand" aria-label="Mira home">
-              <Image
-                src="/assets/mira.png"
-                alt="Mira"
-                width={140}
-                height={38}
-                className="brand-image"
-                priority
-              />
-            </Link>
-            <div className="nav-controls">
-              <nav className="nav-links" aria-label="Primary">
+        <div className="site-shell">
+          <header className="site-header">
+            <div className="container nav-wrap">
+              <Link href="/" className="brand" aria-label="Mira home">
+                <Image
+                  src="/assets/mira.png"
+                  alt="Mira"
+                  width={140}
+                  height={38}
+                  className="brand-image"
+                  priority
+                />
+              </Link>
+              <div className="nav-controls">
+                <nav className="nav-links" aria-label="Primary">
+                  <Link href="/">Home</Link>
+                  <Link href="/roadmap">Roadmap</Link>
+                  <Link href="/downloads">Downloads</Link>
+                </nav>
+                <ThemeToggle />
+              </div>
+            </div>
+          </header>
+
+          {children}
+
+          <footer className="site-footer">
+            <div className="container nav-wrap footer-nav-wrap">
+              <p className="footer-brand">Mira Browser · MIT License · &copy; {year}</p>
+              <nav className="nav-links" aria-label="Footer">
                 <Link href="/">Home</Link>
                 <Link href="/roadmap">Roadmap</Link>
                 <Link href="/downloads">Downloads</Link>
+                <a href="https://github.com/FatalMistake02/mira" target="_blank" rel="noreferrer">
+                  GitHub
+                </a>
+                <a
+                  href="https://github.com/FatalMistake02/mira/blob/main/LICENSE"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  License
+                </a>
               </nav>
-              <ThemeToggle />
             </div>
-          </div>
-        </header>
-        {children}
+          </footer>
+        </div>
       </body>
     </html>
   );

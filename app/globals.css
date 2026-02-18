@@ -68,6 +68,12 @@ body {
   line-height: 1.5;
 }
 
+.site-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -328,6 +334,10 @@ h2 {
   padding: 2rem 0 4rem;
 }
 
+.site-shell > main {
+  flex: 1;
+}
+
 .feature-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -493,6 +503,26 @@ code {
   border: 1px solid #94a3b8;
   position: relative;
   transition: background 0.2s ease;
+}
+
+.site-footer {
+  border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  backdrop-filter: blur(8px);
+  margin-top: 1.5rem;
+}
+
+.footer-nav-wrap {
+  height: auto;
+  min-height: 72px;
+  padding: 0.85rem 0;
+  gap: 1rem;
+}
+
+.footer-brand {
+  margin: 0;
+  font-weight: 600;
+  color: var(--muted);
 }
 
 .toggle-slider::after {
@@ -725,6 +755,17 @@ code {
   .nav-links {
     gap: 0.7rem;
     font-size: 0.9rem;
+  }
+
+  .footer-nav-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .site-footer .nav-links {
+    gap: 0.8rem 1rem;
+    font-size: 0.92rem;
   }
 
   .theme-toggle-label {
