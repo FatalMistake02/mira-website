@@ -17,6 +17,10 @@ const highlights = [
     text: "Choose layouts that fit how you like to browse.",
   },
   {
+    title: "Efficiency",
+    text: "Mira is designed to use memory efficiently during everyday browsing.",
+  },
+  {
     title: "Built to Evolve",
     text: "Open source development keeps Mira highly customizable over time.",
   },

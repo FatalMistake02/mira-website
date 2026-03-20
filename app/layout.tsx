@@ -16,6 +16,8 @@ export const metadata: Metadata = {
     "kolbe-tessarzik",
     "Mira",
     "Browser",
+    "Mira Browser",
+    "efficient browser",
     "open source browser",
     "open-source browser",
     "customizable browser",
