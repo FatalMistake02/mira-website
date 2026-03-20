@@ -17,6 +17,10 @@ const highlights = [
     text: "Choose layouts that fit how you like to browse.",
   },
   {
+    title: "Efficiency",
+    text: "Mira uses significantly less RAM than comparable browsers.",
+  },
+  {
     title: "Built to Evolve",
     text: "Open source development keeps Mira highly customizable over time.",
   },
