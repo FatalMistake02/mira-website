@@ -70,7 +70,7 @@ export default async function RootLayout({
                     priority
                   />
                 </Link>
-                <UpdateBanner latestVersion={latestVersion} settingsUrl="mira://settings#app&checkUpdates=true" compact />
+                <UpdateBanner latestVersion={latestVersion} settingsUrl="mira://Updates" compact />
               </div>
               <div className="nav-controls">
                 <nav className="nav-links" aria-label="Primary">
@@ -95,7 +95,6 @@ export default async function RootLayout({
                 <Link href="/downloads">Downloads</Link>
                 <Link href="/themes">Themes</Link>
                 <Link href="/privacy">Privacy</Link>
-                <Link href="/terms">Terms</Link>
                 <a href="https://github.com/FatalMistake02/mira" target="_blank" rel="noreferrer">
                   GitHub
                 </a>
