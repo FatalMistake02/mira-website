@@ -14,6 +14,7 @@ type ParsedSemver = {
   major: number;
   minor: number;
   patch: number;
+  prerelease: string[] | null;
 };
 
 type GitHubRelease = {
@@ -47,24 +48,55 @@ function parseIncludePrereleases(value: string | string[] | undefined): boolean 
 
 function parseSemver(value: string): ParsedSemver | null {
   const cleaned = value.trim().replace(/^v/i, "");
-  const numericPrefix = cleaned.match(/^[\d.]+/)?.[0] ?? cleaned;
-  const match = numericPrefix.match(/^(\d+)\.(\d+)\.(\d+)\b/);
+  const match = cleaned.match(/(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?/);
 
   if (!match) {
     return null;
   }
 
+  const prerelease = match[4] ? match[4].split(".") : null;
+
   return {
     major: Number(match[1]),
     minor: Number(match[2]),
     patch: Number(match[3]),
+    prerelease,
   };
 }
 
 function compareSemver(a: ParsedSemver, b: ParsedSemver): number {
   if (a.major !== b.major) return a.major - b.major;
   if (a.minor !== b.minor) return a.minor - b.minor;
-  return a.patch - b.patch;
+  if (a.patch !== b.patch) return a.patch - b.patch;
+
+  if (!a.prerelease && !b.prerelease) return 0;
+  if (!a.prerelease) return 1;
+  if (!b.prerelease) return -1;
+
+  const length = Math.max(a.prerelease.length, b.prerelease.length);
+  for (let i = 0; i < length; i += 1) {
+    const aId = a.prerelease[i];
+    const bId = b.prerelease[i];
+
+    if (aId === undefined) return -1;
+    if (bId === undefined) return 1;
+    if (aId === bId) continue;
+
+    const aNum = /^[0-9]+$/.test(aId) ? Number(aId) : null;
+    const bNum = /^[0-9]+$/.test(bId) ? Number(bId) : null;
+
+    if (aNum !== null && bNum !== null) {
+      return aNum - bNum;
+    }
+
+    if (aNum !== null && bNum === null) return -1;
+    if (aNum === null && bNum !== null) return 1;
+
+    if (aId < bId) return -1;
+    if (aId > bId) return 1;
+  }
+
+  return 0;
 }
 
 function getReleaseSemver(release: GitHubRelease): ParsedSemver | null {
@@ -315,7 +347,15 @@ type PageProps = {
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const resolvedSearchParams = (await searchParams) ?? {};
   const userIncludePrereleases = parseIncludePrereleases(resolvedSearchParams.includePrereleases);
-  const shouldNoindex = userIncludePrereleases;
+  const allReleases = await fetchReleases();
+  const stableReleases = allReleases.filter((release) => !release.prerelease);
+  const hasStableLatest = stableReleases.length > 0;
+  const effectiveIncludePrereleases = userIncludePrereleases || !hasStableLatest;
+  const candidateReleases = effectiveIncludePrereleases ? allReleases : stableReleases;
+  const fallbackRelease = candidateReleases[0] ?? null;
+  const updateRelease = getLatestReleaseBySemver(candidateReleases) ?? fallbackRelease;
+  const selectedRelease = updateRelease ?? fallbackRelease;
+  const shouldNoindex = selectedRelease?.prerelease ?? effectiveIncludePrereleases;
   const canonicalPath = "/downloads";
 
   return {
