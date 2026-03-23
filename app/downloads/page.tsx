@@ -317,7 +317,7 @@ function buildDownloadSlots(release: GitHubRelease): {
 
 async function fetchReleases(): Promise<GitHubRelease[]> {
   const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases`, {
-    cache: "no-cache",
+    next: { revalidate: 60 },
     headers: {
       Accept: "application/vnd.github+json",
       "User-Agent": "mira-website",
