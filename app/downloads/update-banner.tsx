@@ -2,12 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { UpdateSettingsActions } from "./update-settings-button";
-
-type ParsedSemver = {
-  major: number;
-  minor: number;
-  patch: number;
-};
+import { compareSemver, parseSemver } from "./semver";
 
 type UpdateBannerProps = {
   latestVersion: string | null;
@@ -19,28 +14,6 @@ type DetectedInfo = {
   browserVersion: string | null;
   miraVersion: string | null;
 };
-
-function parseSemver(value: string): ParsedSemver | null {
-  const cleaned = value.trim().replace(/^v/i, "");
-  const numericPrefix = cleaned.match(/^[\d.]+/)?.[0] ?? cleaned;
-  const match = numericPrefix.match(/^(\d+)\.(\d+)\.(\d+)\b/);
-
-  if (!match) {
-    return null;
-  }
-
-  return {
-    major: Number(match[1]),
-    minor: Number(match[2]),
-    patch: Number(match[3]),
-  };
-}
-
-function compareSemver(a: ParsedSemver, b: ParsedSemver): number {
-  if (a.major !== b.major) return a.major - b.major;
-  if (a.minor !== b.minor) return a.minor - b.minor;
-  return a.patch - b.patch;
-}
 
 function detectFromUserAgent(userAgent: string): DetectedInfo {
   const miraMatch = userAgent.match(/\bMira\/([\d.]+)\b/);
