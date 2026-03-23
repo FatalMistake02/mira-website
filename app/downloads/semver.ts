@@ -7,18 +7,27 @@ export type ParsedSemver = {
 
 export function parseSemver(value: string): ParsedSemver | null {
   const cleaned = value.trim().replace(/^v/i, "");
-  const match = cleaned.match(/(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?/);
+  // Build metadata does not affect precedence, so ignore it for parsing.
+  const withoutBuild = cleaned.split("+", 1)[0] ?? cleaned;
+  // Split "1.2.3-rc.1" into core and prerelease parts.
+  const prereleaseSeparator = withoutBuild.indexOf("-");
+  const core =
+    prereleaseSeparator === -1 ? withoutBuild : withoutBuild.slice(0, prereleaseSeparator);
+  const prereleaseRaw =
+    prereleaseSeparator === -1 ? "" : withoutBuild.slice(prereleaseSeparator + 1);
+  // Core must be strict major.minor.patch.
+  const coreMatch = core.match(/^(\d+)\.(\d+)\.(\d+)$/);
 
-  if (!match) {
+  if (!coreMatch) {
     return null;
   }
 
-  const prerelease = match[4] ? match[4].split(".") : null;
+  const prerelease = prereleaseRaw ? prereleaseRaw.split(".") : null;
 
   return {
-    major: Number(match[1]),
-    minor: Number(match[2]),
-    patch: Number(match[3]),
+    major: Number(coreMatch[1]),
+    minor: Number(coreMatch[2]),
+    patch: Number(coreMatch[3]),
     prerelease,
   };
 }
