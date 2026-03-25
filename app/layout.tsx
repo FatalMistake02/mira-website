@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
+import { UserMenu } from "@/components/auth/user-menu";
 import { getSiteUrl } from "@/lib/site-url";
+import { createClient } from "@/lib/supabase/server";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,12 +13,16 @@ export const metadata: Metadata = {
   description: "An open source desktop browser that helps you get everything done.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const year = new Date().getFullYear();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -50,6 +56,7 @@ export default function RootLayout({
                   <Link href="/themes">Themes</Link>
                 </nav>
                 <ThemeToggle />
+                <UserMenu initialUser={user} />
               </div>
             </div>
           </header>
