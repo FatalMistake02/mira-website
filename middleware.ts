@@ -2,8 +2,11 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
+  // Create a mutable response that we'll modify and return
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
   });
 
   const supabase = createServerClient(
@@ -15,15 +18,20 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => {
-            request.cookies.set(name, value);
+          // Create a new response with the cookies
+          const newResponse = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
           });
-          supabaseResponse = NextResponse.next({
-            request,
-          });
+          
+          // Copy cookies to the new response
           cookiesToSet.forEach(({ name, value, options }) => {
-            supabaseResponse.cookies.set(name, value, options);
+            newResponse.cookies.set(name, value, options);
           });
+          
+          // Update our mutable reference
+          response = newResponse;
         },
       },
     }
@@ -49,7 +57,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return supabaseResponse;
+  return response;
 }
 
 export const config = {
