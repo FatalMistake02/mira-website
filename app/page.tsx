@@ -1,11 +1,5 @@
 import Link from "next/link";
-import { Solitreo } from "next/font/google";
 import { ThemeHeroImage } from "./theme-hero-image";
-
-const solitreo = Solitreo({
-  subsets: ["latin"],
-  weight: "400",
-});
 
 const highlights = [
   {
@@ -48,13 +42,13 @@ export default function Home() {
           <div className="hero-stack">
             <div className="hero-copy">
               <h1 className="animate-fade-up" style={{ animationDelay: "80ms" }}>
-                <span className={solitreo.className} style={{ fontSize: "55px" }}>
+                <span className="font-solitreo" style={{ fontSize: "55px" }}>
                   mira
                 </span>{" "}
                 is an open source desktop browser that helps you get everything done
               </h1>
               <p className="muted-note animate-fade-up" style={{ animationDelay: "180ms" }}>
-                Mira is inspired by the Japanese word 未来 (mirai), meaning "future."
+                Mira is inspired by the Japanese word 未来 (mirai), meaning &quot;future.&quot;
               </p>
               <div className="cta-row animate-fade-up" style={{ animationDelay: "280ms" }}>
                 <Link href="/downloads" className="btn btn-primary">

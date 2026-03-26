@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Script from "next/script";
 import { ThemeToggle } from "./theme-toggle";
 import { UpdateBanner } from "./downloads/update-banner";
 import { getLatestVersion } from "./lib/latest-version";
@@ -51,10 +52,23 @@ export default async function RootLayout({
   } = await supabase.auth.getUser();
   const latestVersion = await getLatestVersion();
 
+  // Check if user is admin
+  let isAdmin = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", user.id)
+      .single();
+    isAdmin = profile?.is_admin || false;
+  }
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script
+        <Script
+          id="theme-preference"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html:
               "try{const t=localStorage.getItem('theme-preference');if(t==='light'||t==='dark'){document.documentElement.dataset.theme=t;}}catch{}",
@@ -80,6 +94,7 @@ export default async function RootLayout({
               </div>
               <div className="nav-controls">
                 <nav className="nav-links" aria-label="Primary">
+                  {isAdmin && <Link href="/admin">Admin</Link>}
                   <Link href="/">Home</Link>
                   <Link href="/roadmap">Roadmap</Link>
                   <Link href="/downloads">Downloads</Link>

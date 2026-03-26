@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProfileByUsername, getProfileThemes } from "@/lib/themes/queries";
+import { getProfileByUsername, getProfileThemes, getAllProfileThemes } from "@/lib/themes/queries";
 import { createClient } from "@/lib/supabase/server";
 import { ThemeGrid } from "@/components/themes/theme-grid";
 import { getSiteUrl } from "@/lib/site-url";
@@ -44,23 +44,29 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     notFound();
   }
 
-  const themes = await getProfileThemes(profile.id);
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   const isOwner = user && user.id === profile.id;
+  
+  // Use getAllProfileThemes for owner to show under review themes, otherwise only approved
+  const themes = isOwner 
+    ? await getAllProfileThemes(profile.id)
+    : await getProfileThemes(profile.id);
   const displayName = profile.display_name || profile.username || "User";
+  
+  // Use profile avatar or fall back to auth metadata avatar
+  const avatarUrl = profile.avatar_url || user?.user_metadata?.avatar_url;
 
   return (
     <main className="section page-enter">
       <div className="container">
         <div className="profile-header animate-fade-up">
           <div className="profile-avatar">
-            {profile.avatar_url ? (
+            {avatarUrl ? (
               <img
-                src={profile.avatar_url}
+                src={avatarUrl}
                 alt={displayName}
                 className="profile-avatar-img"
               />
@@ -85,7 +91,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         </div>
 
         <div className="profile-themes animate-fade-up" style={{ animationDelay: "120ms" }}>
-          <h2>Themes ({themes.length})</h2>
+          <h2>Themes</h2>
           <ThemeGrid themes={themes} />
         </div>
       </div>

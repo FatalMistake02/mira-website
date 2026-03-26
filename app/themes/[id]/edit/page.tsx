@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getThemeById } from "@/lib/themes/queries";
 import { createClient } from "@/lib/supabase/server";
-import { EditThemeForm } from "@/components/themes/edit-theme-form";
+import { UpdateThemeForm } from "@/components/themes/update-theme-form";
 import { getSiteUrl } from "@/lib/site-url";
 
 interface EditThemePageProps {
@@ -23,14 +23,14 @@ export async function generateMetadata({
   }
 
   return {
-    title: `Edit ${theme.name} - Mira Theme`,
+    title: `Update ${theme.name} - Mira Theme`,
     alternates: {
       canonical: `${getSiteUrl()}/themes/${id}/edit`,
     },
   };
 }
 
-export default async function EditThemePage({ params }: EditThemePageProps) {
+export default async function UpdateThemePage({ params }: EditThemePageProps) {
   const { id } = await params;
   const supabase = await createClient();
 
@@ -57,7 +57,7 @@ export default async function EditThemePage({ params }: EditThemePageProps) {
         <div className="container narrow">
           <div className="error-message">
             <h1>Access Denied</h1>
-            <p>You can only edit themes that you own.</p>
+            <p>You can only update themes that you own.</p>
             <Link href={`/themes/${theme.id}`} className="btn btn-primary">
               Back to Theme
             </Link>
@@ -70,13 +70,13 @@ export default async function EditThemePage({ params }: EditThemePageProps) {
   return (
     <main className="section page-enter">
       <div className="container narrow">
-        <h1 className="animate-fade-up">Edit Theme</h1>
+        <h1 className="animate-fade-up">Update Theme</h1>
         <p className="muted-note animate-fade-up" style={{ animationDelay: "80ms" }}>
-          Update your theme details.
+          Upload a new JSON file to update the theme. Name and author will remain unchanged.
         </p>
 
         <div className="upload-form-wrapper animate-fade-up" style={{ animationDelay: "160ms" }}>
-          <EditThemeForm theme={theme} />
+          <UpdateThemeForm theme={theme} />
         </div>
       </div>
     </main>

@@ -8,6 +8,7 @@ export interface Theme {
   css_content: string;
   download_count: number;
   version: string;
+  status?: string;
   created_at: string;
   updated_at: string;
   profiles?: Profile;

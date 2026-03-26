@@ -1,4 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Solitreo&display=swap');
 @import "tailwindcss";
+
+.font-solitreo {
+  font-family: 'Solitreo', cursive;
+}
 
 :root {
   --bg: #f8fafc;
@@ -1002,11 +1007,19 @@ code {
 
 /* Themes Marketplace Styles */
 .themes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 2rem;
 }
 
 .themes-header h1 {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
+}
+
+.themes-header-actions {
+  display: flex;
+  gap: 0.75rem;
 }
 
 .themes-toolbar {
@@ -1216,11 +1229,37 @@ code {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.8rem;
-  color: var(--muted);
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--card-border);
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
-/* Theme Detail Page */
+.theme-card-status {
+  margin-top: 0.5rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.under-review {
+  background: #f59e0b;
+  color: white;
+}
+
+.theme-card-downloads {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
 .theme-detail {
   display: flex;
   flex-direction: column;
@@ -1368,8 +1407,8 @@ code {
 }
 
 .upload-warning {
-  background: color-mix(in srgb, #fef3c7 50%, var(--surface));
-  border: 1px solid #fbbf24;
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--surface));
   border-radius: 8px;
   padding: 1rem;
   display: flex;
@@ -1382,6 +1421,11 @@ code {
 .upload-warning p {
   margin: 0;
   font-size: 0.9rem;
+  color: var(--text);
+}
+
+.upload-warning strong {
+  color: var(--primary);
 }
 
 .form-group {
@@ -1518,6 +1562,9 @@ code {
   border: none;
   padding: 0;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .user-avatar {
@@ -1681,6 +1728,269 @@ code {
   margin-bottom: 1.5rem;
 }
 
+/* Admin Page Styles */
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.stat-card h3 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--accent-color);
+  margin: 0 0 0.5rem 0;
+}
+
+.stat-card p {
+  color: var(--text-muted);
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.admin-section {
+  margin-top: 2rem;
+}
+
+.admin-section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+.admin-table-container {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.admin-table th {
+  background: var(--card-bg);
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-table tr:hover {
+  background: var(--card-bg-hover, rgba(0,0,0,0.02));
+}
+
+.admin-link {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease;
+}
+
+.admin-link:hover {
+  background: var(--accent-color-alpha, rgba(59, 130, 246, 0.1));
+}
+
+/* Admin Actions & Badge */
+.admin-actions {
+  margin: 1.5rem 0;
+}
+
+.admin-review-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.admin-badge {
+  background: #ef4444;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  min-width: 1.5rem;
+  text-align: center;
+}
+
+/* Review Page Styles */
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.review-themes {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.review-theme-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: box-shadow 0.2s ease;
+}
+
+.review-theme-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.review-theme-link {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.review-theme-info {
+  flex: 1;
+}
+
+.review-theme-info h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.25rem;
+  color: var(--text-color);
+}
+
+.review-theme-author {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.review-theme-date {
+  margin: 0.25rem 0 0 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.review-theme-version {
+  flex-shrink: 0;
+}
+
+.version-badge {
+  background: var(--accent-color-alpha, rgba(59, 130, 246, 0.1));
+  color: var(--accent-color);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.review-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.review-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.btn-success {
+  background: #22c55e;
+  color: white;
+  border: none;
+}
+
+.btn-success:hover {
+  background: #16a34a;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+  border: none;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+.review-empty {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+}
+
+.review-empty p {
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .admin-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .admin-table th,
+  .admin-table td {
+    padding: 0.75rem;
+  }
+
+  .review-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .review-theme-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .review-theme-link {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .review-actions {
+    justify-content: stretch;
+  }
+
+  .review-btn {
+    flex: 1;
+  }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .themes-layout {
@@ -1726,3 +2036,533 @@ code {
   }
 }
 
+/* =============================================
+   MIRA BROWSER THEME PREVIEW STYLES
+   ============================================= */
+
+.mira-browser-preview {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 500px;
+  background: var(--bg);
+  border-radius: var(--layoutPanelRadius, 8px);
+  overflow: hidden;
+  font-family: var(--fontPrimaryFamily, var(--fontPrimaryFallbackFamily, 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif));
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Top Bar with Tabs */
+.mira-top-bar {
+  height: var(--layoutTopBarHeight, 38px);
+  background: var(--surfaceBg, var(--tabBg));
+  border-bottom: 1px solid var(--surfaceBorder, var(--tabBorder));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  user-select: none;
+}
+
+/* Brand */
+.mira-brand {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 10px;
+  flex-shrink: 0;
+}
+
+.mira-brand-icon-img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.mira-brand-wordmark {
+  height: 25px;
+  width: auto;
+  margin-left: -6px;
+  transform: translateY(1px);
+  object-fit: contain;
+}
+
+.mira-tabs-container {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--layoutTabGap, 6px);
+  flex: 1;
+  height: 100%;
+  padding: 0 8px;
+}
+
+.mira-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--layoutTabHeight, 34px);
+  min-width: 140px;
+  max-width: 220px;
+  padding: 0 12px;
+  background: var(--tabBg);
+  border: 1px solid var(--tabBorder);
+  border-bottom: 1px solid var(--tabBorder);
+  border-radius: var(--layoutTabRadius, 8px) var(--layoutTabRadius, 8px) 0 0;
+  color: var(--tabText);
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.mira-tab:hover {
+  background: var(--tabBgHover);
+  border-color: var(--tabBorderHover);
+  color: var(--tabTextHover);
+}
+
+/* FIX: use Active variables, not Hover */
+.mira-tab-active {
+  background: var(--tabBgActive);
+  border-color: var(--tabBorderActive);
+  border-bottom-color: var(--tabBgActive);
+  color: var(--tabTextActive);
+  z-index: 1;
+}
+
+.mira-tab-active:hover {
+  background: var(--tabBgActive);
+  border-color: var(--tabBorderActive);
+  border-bottom-color: var(--tabBgActive);
+  color: var(--tabTextActive);
+}
+
+.mira-tab-title {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--fontSecondaryFamily, var(--fontSecondaryFallbackFamily));
+}
+
+.mira-tab-close {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.5;
+  transition: background-color 120ms ease, opacity 120ms ease;
+}
+
+.mira-tab-close:hover {
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  opacity: 1;
+}
+
+.mira-new-tab-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--tabText);
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.mira-new-tab-btn:hover {
+  background: var(--tabBgHover);
+  color: var(--tabTextHover);
+}
+
+/* Window Controls */
+.mira-window-controls {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.mira-window-btn {
+  width: 44px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text1);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.mira-window-btn:hover {
+  background: var(--surfaceBgHover);
+}
+
+.mira-window-btn-close:hover {
+  background: #e81123;
+  color: white;
+}
+
+/* Address Bar */
+/* FIX: use urlBar variables instead of surface/tab hover */
+.mira-address-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--layoutAddressBarPaddingY, 6px);
+  background: var(--urlBarBg);
+  border-top: 1px solid var(--urlBarBorder);
+}
+
+.mira-nav-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.mira-nav-btn {
+  width: var(--layoutNavButtonHeight, 30px);
+  height: var(--layoutNavButtonHeight, 30px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--navButtonBg);
+  border: 1px solid var(--navButtonBorder);
+  border-radius: 999px;
+  color: var(--navButtonText);
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+  padding: 0;
+}
+
+.mira-nav-btn:hover:not(:disabled) {
+  background: var(--navButtonBgHover);
+  border-color: var(--navButtonBorderHover);
+  color: var(--navButtonTextHover);
+}
+
+.mira-nav-btn:active:not(:disabled) {
+  background: var(--navButtonBgActive);
+  border-color: var(--navButtonBorderActive);
+  color: var(--navButtonTextActive);
+}
+
+.mira-nav-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.mira-url-container {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.mira-url-input {
+  width: 100%;
+  height: var(--layoutNavButtonHeight, 30px);
+  padding: 6px 40px 6px 12px;
+  background: var(--urlBarBg);
+  border: 1px solid var(--urlBarBorder);
+  border-radius: var(--layoutInputRadius, 6px);
+  color: var(--urlBarText);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.mira-url-input:hover {
+  background: var(--urlBarBgHover);
+  border-color: var(--urlBarBorderHover);
+}
+
+.mira-url-input:focus {
+  background: var(--urlBarBgActive);
+  border-color: var(--urlBarBorderActive);
+}
+
+.mira-bookmark-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text2);
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.mira-bookmark-btn:hover {
+  background: color-mix(in srgb, var(--navButtonText) 10%, transparent);
+  color: var(--navButtonTextHover);
+}
+
+.mira-menu-btn {
+  width: var(--layoutNavButtonHeight, 30px);
+  height: var(--layoutNavButtonHeight, 30px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--navButtonBg);
+  border: 1px solid var(--navButtonBorder);
+  border-radius: 999px;
+  color: var(--navButtonText);
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.mira-menu-btn:hover {
+  background: var(--navButtonBgHover);
+  border-color: var(--navButtonBorderHover);
+  color: var(--navButtonTextHover);
+}
+
+/* Content Area */
+.mira-content {
+  flex: 1;
+  min-height: 0;
+  background: var(--bg);
+  overflow-y: auto;
+}
+
+/* New Tab Content */
+.mira-newtab-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 60px 24px;
+  min-height: 100%;
+  color: var(--text1);
+}
+
+.mira-logo-container {
+  margin-bottom: 24px;
+  width: 180px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mira-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.mira-title {
+  font-size: 34px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: var(--text1);
+  letter-spacing: 0.3px;
+}
+
+.mira-search-box {
+  width: 100%;
+  max-width: 600px;
+  margin: 28px 0 36px;
+}
+
+.mira-search-input {
+  width: 100%;
+  padding: 12px 18px;
+  background: var(--urlBarBg);
+  border: 1px solid var(--urlBarBorder);
+  border-radius: var(--layoutInputRadius, 6px);
+  color: var(--urlBarText);
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  transition: background-color 120ms ease, border-color 120ms ease;
+  box-sizing: border-box;
+}
+
+.mira-search-input::placeholder {
+  color: var(--urlBarTextPlaceholder, var(--text3));
+}
+
+.mira-search-input:hover {
+  background: var(--urlBarBgHover);
+  border-color: var(--urlBarBorderHover);
+}
+
+.mira-search-input:focus {
+  background: var(--urlBarBgActive);
+  border-color: var(--urlBarBorderActive);
+}
+
+/* Quick Links Grid */
+.mira-quick-links {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .mira-tab {
+    min-width: 100px;
+    max-width: 160px;
+    padding: 0 8px;
+  }
+  
+  .mira-newtab-content {
+    padding: 40px 16px;
+  }
+  
+  .mira-title {
+    font-size: 24px;
+  }
+  
+  .mira-logo-container {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+/* Theme Preview Page Specific */
+.theme-preview-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.theme-preview-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.theme-preview-page-header h1 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.theme-preview-frame {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Mini preview for cards */
+.mini-preview .mira-browser-preview {
+  min-height: 180px;
+  font-size: 11px;
+  transform: scale(0.65);
+  transform-origin: top left;
+  width: 154%;
+  height: 154%;
+}
+
+.mini-preview .mira-top-bar {
+  height: 28px;
+}
+
+.mini-preview .mira-tab {
+  height: 24px;
+  min-width: 60px;
+  padding: 0 8px;
+  font-size: 10px;
+}
+
+.mini-preview .mira-address-bar {
+  padding: 4px;
+}
+
+.mini-preview .mira-nav-btn {
+  width: 22px;
+  height: 22px;
+}
+
+.mini-preview .mira-url-input {
+  height: 22px;
+  padding: 4px 28px 4px 8px;
+  font-size: 11px;
+}
+
+.mini-preview .mira-bookmark-btn {
+  width: 18px;
+  height: 18px;
+  right: 4px;
+}
+
+.mini-preview .mira-menu-btn {
+  width: 22px;
+  height: 22px;
+}
+
+.mini-preview .mira-newtab-content {
+  padding: 20px 12px;
+}
+
+.mini-preview .mira-logo-container {
+  margin-bottom: 24px;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mini-preview .mira-logo-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.mini-preview .mira-brand-icon-img {
+  width: 10px;
+  height: 10px;
+}
+
+.mini-preview .mira-brand-wordmark {
+  height: 16px;
+  margin-left: -4px;
+}
+
+.mini-preview .mira-title {
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.mini-preview .mira-search-box {
+  max-width: 200px;
+  margin-bottom: 16px;
+}
+
+.mini-preview .mira-search-input {
+  padding: 6px 12px;
+  font-size: 11px;
+}
+
+.mini-preview .mira-cards-grid {
+  display: none;
+}

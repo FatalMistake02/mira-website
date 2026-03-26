@@ -4,7 +4,7 @@ import { getThemes, getTags } from "@/lib/themes/queries";
 import { ThemeGrid } from "@/components/themes/theme-grid";
 import { SearchBar } from "@/components/themes/search-bar";
 import { ThemeFilters } from "@/components/themes/theme-filters";
-import { SignInModal } from "@/components/auth/sign-in-modal";
+import { SignInModalWrapper } from "./sign-in-modal-wrapper";
 import { getSiteUrl } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/server";
 
@@ -46,28 +46,21 @@ export default async function ThemesPage({ searchParams }: ThemesPageProps) {
     <main className="section page-enter">
       <div className="container">
         <div className="themes-header">
-          <h1 className="animate-fade-up">Themes Marketplace</h1>
-          <p className="muted-note animate-fade-up" style={{ animationDelay: "80ms" }}>
-            Browse community themes for Mira and share your own.
-          </p>
+          <h1 className="animate-fade-up">Themes</h1>
+          <div className="themes-header-actions">
+            {!user && (
+              <Link href="/themes?signin=true" className="btn btn-ghost">
+                Sign in
+              </Link>
+            )}
+            <Link href="/themes/upload" className="btn btn-primary">
+              Upload Theme
+            </Link>
+          </div>
         </div>
 
         <div className="themes-toolbar animate-fade-up" style={{ animationDelay: "160ms" }}>
-          <SearchBar
-            initialValue={search}
-            onSearch={(query) => {
-              const url = new URL(window.location.href);
-              if (query) {
-                url.searchParams.set("search", query);
-              } else {
-                url.searchParams.delete("search");
-              }
-              window.location.href = url.toString();
-            }}
-          />
-          <Link href="/themes/upload" className="btn btn-primary">
-            Upload Theme
-          </Link>
+          <SearchBar initialValue={search} />
         </div>
 
         <div className="themes-layout animate-fade-up" style={{ animationDelay: "240ms" }}>
@@ -76,20 +69,6 @@ export default async function ThemesPage({ searchParams }: ThemesPageProps) {
               tags={tags}
               selectedTag={tag}
               sortBy={sortBy}
-              onTagChange={(selectedTag) => {
-                const url = new URL(window.location.href);
-                if (selectedTag) {
-                  url.searchParams.set("tag", selectedTag);
-                } else {
-                  url.searchParams.delete("tag");
-                }
-                window.location.href = url.toString();
-              }}
-              onSortChange={(sort) => {
-                const url = new URL(window.location.href);
-                url.searchParams.set("sort", sort);
-                window.location.href = url.toString();
-              }}
             />
           </aside>
 
@@ -99,7 +78,7 @@ export default async function ThemesPage({ searchParams }: ThemesPageProps) {
         </div>
       </div>
 
-      <SignInModal isOpen={showSignIn} onClose={() => {}} />
+      <SignInModalWrapper isOpen={showSignIn} />
     </main>
   );
 }

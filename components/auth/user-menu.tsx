@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
@@ -12,6 +12,7 @@ interface UserMenuProps {
 export function UserMenu({ initialUser }: UserMenuProps) {
   const [user, setUser] = useState<User | null>(initialUser);
   const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -26,6 +27,20 @@ export function UserMenu({ initialUser }: UserMenuProps) {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Close menu when clicking outside
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
   const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -35,15 +50,11 @@ export function UserMenu({ initialUser }: UserMenuProps) {
   };
 
   if (!user) {
-    return (
-      <Link href="/themes?signin=true" className="btn btn-ghost">
-        Sign in
-      </Link>
-    );
+    return null;
   }
 
   return (
-    <div className="user-menu">
+    <div className="user-menu" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="user-menu-trigger"

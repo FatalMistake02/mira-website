@@ -1,32 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface SearchBarProps {
   initialValue?: string;
-  onSearch: (query: string) => void;
 }
 
-export function SearchBar({ initialValue = "", onSearch }: SearchBarProps) {
+export function SearchBar({ initialValue = "" }: SearchBarProps) {
   const [query, setQuery] = useState(initialValue);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const hasInteracted = useRef(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSearch(query);
+  // Debounced search - only after user interaction and if value actually changed
+  useEffect(() => {
+    if (!hasInteracted.current) return;
+
+    const currentSearch = searchParams.get("search") || "";
+    if (query === currentSearch) return;
+
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (query) {
+        params.set("search", query);
+      } else {
+        params.delete("search");
+      }
+      router.push(`/themes?${params.toString()}`);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [query, router, searchParams]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    hasInteracted.current = true;
+    setQuery(e.target.value);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="search-bar">
+    <div className="search-bar">
       <input
         type="text"
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={handleChange}
         placeholder="Search themes..."
         className="search-input"
       />
-      <button type="submit" className="btn btn-primary search-button">
-        Search
-      </button>
-    </form>
+    </div>
   );
 }

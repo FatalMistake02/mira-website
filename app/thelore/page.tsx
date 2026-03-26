@@ -1,12 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Solitreo } from "next/font/google";
-
-const solitreo = Solitreo({
-  subsets: ["latin"],
-  weight: "400",
-});
 
 export default function TheLorePage() {
 	const [isDarkMode, setIsDarkMode] = useState(false);
@@ -52,7 +46,7 @@ export default function TheLorePage() {
 			color: isDarkMode ? '#ffffff' : '#000000',
 			fontFamily: 'Solitreo, serif',
 		}}>
-			<h1 style={{ fontSize: '3rem', margin: 0 }} className={solitreo.className}>the LORE</h1>
+			<h1 style={{ fontSize: '3rem', margin: 0 }} className="font-solitreo">the LORE</h1>
 
 			<div style={{ maxWidth: 800, marginTop: '1.5rem', padding: '0 1rem', lineHeight: 1.7 }}>
 				<p>

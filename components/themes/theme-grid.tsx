@@ -11,7 +11,7 @@ export function ThemeGrid({ themes }: ThemeGridProps) {
   if (themes.length === 0) {
     return (
       <div className="theme-grid-empty">
-        <p>No themes found. Be the first to upload one!</p>
+        <p>No themes found.</p>
       </div>
     );
   }

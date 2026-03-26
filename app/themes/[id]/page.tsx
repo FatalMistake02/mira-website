@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { getThemeById, getThemeVersions } from "@/lib/themes/queries";
 import { createClient } from "@/lib/supabase/server";
 import { getSiteUrl } from "@/lib/site-url";
+import { DownloadButton } from "./download-button";
+import { ThemePreview } from "@/components/themes/theme-preview";
 
 interface ThemeDetailPageProps {
   params: Promise<{ id: string }>;
@@ -50,15 +52,6 @@ export default async function ThemeDetailPage({ params }: ThemeDetailPageProps) 
   const authorUsername = theme.profiles?.username;
   const authorDisplayName = theme.profiles?.display_name || theme.author_name;
 
-  const handleDownload = async () => {
-    "use server";
-    // Increment download count
-    const { error } = await supabase.rpc("increment_download_count", {
-      theme_id: id,
-    });
-    if (error) console.error("Error incrementing download count:", error);
-  };
-
   return (
     <main className="section page-enter">
       <div className="container">
@@ -92,20 +85,19 @@ export default async function ThemeDetailPage({ params }: ThemeDetailPageProps) 
               )}
             </div>
             <div className="theme-detail-actions">
-              <a
-                href={`data:text/css;charset=utf-8,${encodeURIComponent(theme.css_content)}`}
-                download={`${theme.name.toLowerCase().replace(/\s+/g, "-")}.css`}
-                className="btn btn-primary"
-                onClick={handleDownload}
-              >
-                Download
-              </a>
+              <DownloadButton
+                themeId={theme.id}
+                themeName={theme.name}
+                authorName={theme.author_name}
+                version={theme.version}
+                cssContent={theme.css_content}
+              />
               {isOwner && (
                 <Link
                   href={`/themes/${theme.id}/edit`}
                   className="btn btn-ghost"
                 >
-                  Edit Theme
+                  Update Theme
                 </Link>
               )}
             </div>
@@ -123,10 +115,6 @@ export default async function ThemeDetailPage({ params }: ThemeDetailPageProps) 
 
           <div className="theme-detail-meta">
             <div className="theme-meta-item">
-              <span className="theme-meta-label">Version</span>
-              <span className="theme-meta-value">{theme.version}</span>
-            </div>
-            <div className="theme-meta-item">
               <span className="theme-meta-label">Downloads</span>
               <span className="theme-meta-value">{theme.download_count}</span>
             </div>
@@ -135,6 +123,10 @@ export default async function ThemeDetailPage({ params }: ThemeDetailPageProps) 
               <span className="theme-meta-value">
                 {new Date(theme.created_at).toLocaleDateString()}
               </span>
+            </div>
+            <div className="theme-meta-item">
+              <span className="theme-meta-label">Version</span>
+              <span className="theme-meta-value">{theme.version}</span>
             </div>
           </div>
 
@@ -154,11 +146,9 @@ export default async function ThemeDetailPage({ params }: ThemeDetailPageProps) 
             </div>
           )}
 
-          <div className="theme-detail-css">
-            <h2>CSS Code</h2>
-            <pre className="theme-css-code">
-              <code>{theme.css_content}</code>
-            </pre>
+          <div className="theme-detail-preview-section">
+            <h2>Preview</h2>
+            <ThemePreview cssContent={theme.css_content} />
           </div>
         </div>
       </div>

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { UploadForm } from "@/components/themes/upload-form";
 import { getSiteUrl } from "@/lib/site-url";
@@ -34,17 +33,11 @@ export default async function UploadPage() {
     <main className="section page-enter">
       <div className="container narrow">
         <h1 className="animate-fade-up">Upload Theme</h1>
-        <p className="muted-note animate-fade-up" style={{ animationDelay: "80ms" }}>
-          Share your custom Mira theme with the community.
-        </p>
 
         <div className="upload-form-wrapper animate-fade-up" style={{ animationDelay: "160ms" }}>
           <UploadForm
             userId={user?.id}
             authorName={authorName}
-            onAnonymousWarning={() => {
-              redirect("/themes?signin=true");
-            }}
           />
         </div>
       </div>
