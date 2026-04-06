@@ -41,13 +41,15 @@ export default function Home() {
         <div className="container">
           <div className="hero-stack">
             <div className="hero-copy">
-              <h1 className="animate-fade-up" style={{ animationDelay: "80ms" }}>
-                <span className="font-solitreo" style={{ fontSize: "55px" }}>
+              <h1 className="animate-fade-up" style={{ animationDelay: "80ms", lineHeight: "1.4" }}>
+                <span className="font-solitreo" style={{ fontSize: "55px", lineHeight: "1", display: "inline-block", position: "relative", top: "-8px" }}>
                   mira
                 </span>{" "}
-                is an open source desktop browser that helps you get everything done
+                <span style={{ position: "relative", top: "-8px" }}>
+                  is an open source desktop browser that helps you get everything done
+                </span>
               </h1>
-              <p className="muted-note animate-fade-up" style={{ animationDelay: "180ms" }}>
+              <p className="muted-note animate-fade-up" style={{ animationDelay: "180ms", marginTop: "-0.7rem", marginBottom: "0.6rem" }}>
                 Mira is inspired by the Japanese word 未来 (mirai), meaning &quot;future.&quot;
               </p>
               <div className="cta-row animate-fade-up" style={{ animationDelay: "280ms" }}>
