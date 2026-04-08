@@ -12,5 +12,6 @@ npm run dev
 Open `http://localhost:3000`.
 
 ## Published Site
+The published site is at https://mira.fatalmistake02.com.
 
 Download Mira for Windows, MacOS and Linux [here](https://mira.fatalmistake02.com/downloads).
