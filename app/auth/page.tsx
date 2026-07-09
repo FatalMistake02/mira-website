@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { useSearchParams, useRouter } from "next/navigation";
 
 // In production, this should be process.env.NEXT_PUBLIC_SITE_URL
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "https://mira.fatalmistake02.com";
 
 export default function AuthPage() {
   const router = useRouter();
