@@ -22,7 +22,8 @@ export default function AuthPage() {
     email: false,
     google: false,
     github: false,
-    continue: false, // Added loading state for the continue button
+    continue: false, 
+    logout: false, // Added loading state for logout
   });
 
   const [isSignUp, setIsSignUp] = useState(false);
@@ -49,37 +50,23 @@ export default function AuthPage() {
     localStorage.setItem("auth_last_method", method);
   };
 
-  /**
-   * Updated handleContinue:
-   * 1. Calls server API to create a 30s temporary token
-   * 2. Appends token to the redirect URL
-   * 3. Redirects the user
-   */
   const handleContinue = async () => {
     const targetPath = redirectParam || "/";
-    
     setLoading((prev) => ({ ...prev, continue: true }));
 
     try {
-      // 1. Request token from server API
       const response = await fetch("/api/auth/create-token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ redirectUrl: targetPath }),
       });
 
-      if (!response.ok) {
-        throw new Error("Could not generate secure session token.");
-      }
+      if (!response.ok) throw new Error("Could not generate secure session token.");
 
       const { token } = await response.json();
-
-      // 2. Append token to URL
-      // Check if URL already has query params to use '&' instead of '?'
       const separator = targetPath.includes("?") ? "&" : "?";
       const finalUrl = `${targetPath}${separator}token=${token}`;
 
-      // 3. Execute Redirect
       if (targetPath.startsWith("http://") || targetPath.startsWith("https://")) {
         window.location.href = finalUrl;
       } else {
@@ -90,6 +77,21 @@ export default function AuthPage() {
     } finally {
       setLoading((prev) => ({ ...prev, continue: false }));
     }
+  };
+
+  // --- NEW LOGOUT FUNCTION ---
+  const handleLogout = async () => {
+    setLoading((prev) => ({ ...prev, logout: true }));
+    const supabase = createClient();
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+      alert(error.message);
+    } else {
+      // Force a reload to clear the user state and return to the login screen
+      window.location.href = "/auth";
+    }
+    setLoading((prev) => ({ ...prev, logout: false }));
   };
 
   const getFullRedirectUrl = () => {
@@ -200,6 +202,16 @@ export default function AuthPage() {
                       style={{ cursor: loading.continue ? "not-allowed" : "pointer" }}
                     >
                       {loading.continue ? "Loading..." : `Continue as ${user.email}`}
+                    </button>
+                    
+                    {/* --- LOGOUT BUTTON --- */}
+                    <button 
+                      onClick={handleLogout}
+                      disabled={loading.logout}
+                      className="w-full py-2 text-xs font-medium transition-colors hover:text-[var(--text)]"
+                      style={{ color: "var(--muted)", cursor: "pointer", background: "none", border: "none" }}
+                    >
+                      {loading.logout ? "Signing out..." : "Sign out of account"}
                     </button>
                   </div>
                 )}
