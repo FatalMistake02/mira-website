@@ -1,62 +1,62 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 
 // --- FAKE IN-MEMORY DATABASE ---
-// In a real app, these would be actual database tables
+// These represent the Client App's own local database
 const FAKE_USER_DB: Record<string, any> = {}; 
 const FAKE_SESSIONS: Record<string, string> = {}; 
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Configuration for the Auth Server
+const AUTH_SERVER_URL = "https://mira.fatalmistake02.com/api/auth/verify";
+const CLIENT_API_KEY = "test_key_123"; // This should be in your .env as process.env.MIRA_API_KEY
 
 export async function POST(req: Request) {
   try {
     const { token } = await req.json();
 
-    // 1. Simulate the 3rd party app's API Key
-    // In a real scenario, the 3rd party server would store this in their .env
-    const TEST_API_KEY = "test_key_123"; // Ensure this exists in your api_keys table!
-    const TEST_DOMAIN = "mira.fatalmistake02.com";
-
-    // 2. Call the verification logic (Internal check)
-    const { data: keyData } = await supabaseAdmin
-      .from("api_keys")
-      .select("domain")
-      .eq("key_value", TEST_API_KEY)
-      .single();
-
-    if (!keyData || keyData.domain !== TEST_DOMAIN) {
-      return NextResponse.json({ error: "API Key invalid for this domain" }, { status: 401 });
+    if (!token) {
+      return NextResponse.json({ error: "Token is required" }, { status: 400 });
     }
 
-    const { data: tokenData } = await supabaseAdmin
-      .from("auth_tokens")
-      .select("user_id, redirect_url")
-      .eq("token", token)
-      .gt("expires_at", new Date().toISOString())
-      .single();
+    // 1. CALL THE EXTERNAL AUTH SERVER
+    // We send the token and our registered API Key to the central server
+    const verifyResponse = await fetch(AUTH_SERVER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        apiKey: CLIENT_API_KEY,
+        token: token,
+      }),
+    });
 
-    if (!tokenData) {
-      return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
+    const verifyData = await verifyResponse.json();
+
+    // 2. Handle failures from the Auth Server
+    if (!verifyResponse.ok || !verifyData.success) {
+      return NextResponse.json(
+        { error: verifyData.error || "Authentication failed at Auth Server" }, 
+        { status: verifyResponse.status || 401 }
+      );
     }
 
-    const miraUserId = tokenData.user_id;
+    // The Auth Server returned the user's identity
+    const miraUser = verifyData.user; // { id, email, username }
 
-    // 3. Fake Database: Check if local user exists by Mira UUID
-    if (!FAKE_USER_DB[miraUserId]) {
-      console.log(`Creating new local user for Mira ID: ${miraUserId}`);
-      FAKE_USER_DB[miraUserId] = {
+    // 3. Local User Sync (Client App Database)
+    // We use the miraUser.id (UUID) as the unique identifier to link accounts
+    if (!FAKE_USER_DB[miraUser.id]) {
+      console.log(`Creating new local account for Mira User: ${miraUser.id}`);
+      FAKE_USER_DB[miraUser.id] = {
         id: `local_${Math.random().toString(36).substr(2, 9)}`,
-        miraId: miraUserId,
+        miraId: miraUser.id,
+        email: miraUser.email,
+        username: miraUser.username,
         createdAt: new Date().toISOString(),
       };
     }
 
-    const localUser = FAKE_USER_DB[miraUserId];
+    const localUser = FAKE_USER_DB[miraUser.id];
 
-    // 4. Generate a random session key
+    // 4. Generate a local session key
     const sessionKey = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     FAKE_SESSIONS[sessionKey] = localUser.id;
 
@@ -76,7 +76,7 @@ export async function POST(req: Request) {
 
     return response;
   } catch (error) {
-    console.error(error);
+    console.error("Client Route Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
