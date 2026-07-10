@@ -1,25 +1,74 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import crypto from "node:crypto";
 
+// 1. Define interfaces to replace 'any'
+interface LocalUser {
+  id: string;
+  miraId: string;
+  email: string;
+  username: string;
+  createdAt: string;
+}
+
+interface MiraUser {
+  id: string;
+  email: string;
+  username: string;
+}
+
 // --- FAKE IN-MEMORY DATABASE ---
-// These represent the Client App's own local database
-const FAKE_USER_DB: Record<string, any> = {}; 
+const FAKE_USER_DB: Record<string, LocalUser> = {}; 
 const FAKE_SESSIONS: Record<string, string> = {}; 
 
-// Configuration for the Auth Server
 const AUTH_SERVER_URL = "https://mira.fatalmistake02.com/api/auth/verify";
-const CLIENT_API_KEY = "test_key_123"; // This should be in your .env as process.env.MIRA_API_KEY
+const CLIENT_API_KEY = "test_key_123";
 
 export async function POST(req: Request) {
   try {
-    const { token } = await req.json();
+    const cookieStore = await cookies(); 
+    const existingSession = cookieStore.get("mira_test_session");
 
+    let body: { token?: string } = {};
+    try {
+      body = await req.json();
+    } catch {}
+    
+    const token = body.token;
+
+    // --- SESSION VALIDATION ---
+    if (existingSession) {
+      const sessionKey = existingSession.value;
+      const localUserId = FAKE_SESSIONS[sessionKey];
+
+      if (!localUserId) {
+        return NextResponse.json(
+          { error: "Session expired or invalid. Please login again." }, 
+          { status: 401 }
+        );
+      }
+
+      const localUser = Object.values(FAKE_USER_DB).find(u => u.id === localUserId);
+
+      if (!localUser) {
+        return NextResponse.json(
+          { error: "User account not found in local database." }, 
+          { status: 401 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        user: localUser,
+        message: "Authenticated via existing session",
+      });
+    }
+
+    // --- TOKEN VERIFICATION ---
     if (!token) {
       return NextResponse.json({ error: "Token is required" }, { status: 400 });
     }
 
-    // 1. CALL THE EXTERNAL AUTH SERVER
-    // We send the token and our registered API Key to the central server
     const verifyResponse = await fetch(AUTH_SERVER_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -31,7 +80,6 @@ export async function POST(req: Request) {
 
     const verifyData = await verifyResponse.json();
 
-    // 2. Handle failures from the Auth Server
     if (!verifyResponse.ok || !verifyData.success) {
       return NextResponse.json(
         { error: verifyData.error || "Authentication failed at Auth Server" }, 
@@ -39,11 +87,9 @@ export async function POST(req: Request) {
       );
     }
 
-    // The Auth Server returned the user's identity
-    const miraUser = verifyData.user; // { id, email, username }
+    const miraUser = verifyData.user as MiraUser;
 
-    // 3. Local User Sync (Client App Database)
-    // We use the miraUser.id (UUID) as the unique identifier to link accounts
+    // Local User Sync
     if (!FAKE_USER_DB[miraUser.id]) {
       console.log(`Creating new local account for Mira User: ${miraUser.id}`);
       FAKE_USER_DB[miraUser.id] = {
@@ -57,22 +103,21 @@ export async function POST(req: Request) {
 
     const localUser = FAKE_USER_DB[miraUser.id];
 
-    // 4. Generate a local session key
-    const sessionKey = crypto.randomBytes(32).toString('hex');
-    FAKE_SESSIONS[sessionKey] = localUser.id;
+    // Generate a new session key
+    const newSessionKey = crypto.randomBytes(32).toString('hex');
+    FAKE_SESSIONS[newSessionKey] = localUser.id;
 
-    // 5. Create Response with HttpOnly Cookie
     const response = NextResponse.json({
       success: true,
       user: localUser,
     });
 
-    response.cookies.set("mira_test_session", sessionKey, {
+    response.cookies.set("mira_test_session", newSessionKey, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 24, // 24 hours
+      maxAge: 60 * 60 * 24, 
     });
 
     return response;

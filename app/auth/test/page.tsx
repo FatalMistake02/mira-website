@@ -12,19 +12,48 @@ export default function AuthTestPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    // If we detect a token in the URL, automatically start the verification process
-    if (token) {
-      verifyToken();
-    }
+    const initAuth = async () => {
+      // 1. If there is a token in the URL, we prioritize verifying that token
+      if (token) {
+        await verifyToken(token);
+      } else {
+        // 2. Otherwise, check if we already have a valid session cookie
+        await checkExistingSession();
+      }
+    };
+
+    initAuth();
   }, [token]);
 
-  const verifyToken = async () => {
+  // This function checks the server for an existing HttpOnly cookie
+  const checkExistingSession = async () => {
+    try {
+      // We send an empty object or nothing because we are relying on the cookie
+      const response = await fetch("/api/auth/test-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}), 
+      });
+
+      if (response.ok) {
+        setStatus("success");
+      } else {
+        // If it's not OK (e.g., 401), we just stay "idle" 
+        // so the user sees the "Login with Mira" button
+        setStatus("idle");
+      }
+    } catch (e) {
+      setStatus("idle");
+    }
+  };
+
+  const verifyToken = async (tokenValue: string) => {
     setStatus("logging-in");
     try {
       const response = await fetch("/api/auth/test-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
+        body: JSON.stringify({ token: tokenValue }),
       });
 
       if (!response.ok) {
@@ -66,7 +95,7 @@ export default function AuthTestPage() {
         {status === "logging-in" && (
           <div className="flex flex-col items-center gap-3">
             <div className="w-6 h-6 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-sm text-[var(--muted)]">Logging in...</p>
+            <p className="text-sm text-[var(--muted)]">Checking session...</p>
           </div>
         )}
 
