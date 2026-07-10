@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import crypto from "node:crypto";
 
 // --- FAKE IN-MEMORY DATABASE ---
 // These represent the Client App's own local database
@@ -46,7 +47,7 @@ export async function POST(req: Request) {
     if (!FAKE_USER_DB[miraUser.id]) {
       console.log(`Creating new local account for Mira User: ${miraUser.id}`);
       FAKE_USER_DB[miraUser.id] = {
-        id: `local_${Math.random().toString(36).substr(2, 9)}`,
+        id: `local_${crypto.randomBytes(16).toString('hex')}`,
         miraId: miraUser.id,
         email: miraUser.email,
         username: miraUser.username,
@@ -57,7 +58,7 @@ export async function POST(req: Request) {
     const localUser = FAKE_USER_DB[miraUser.id];
 
     // 4. Generate a local session key
-    const sessionKey = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const sessionKey = crypto.randomBytes(32).toString('hex');
     FAKE_SESSIONS[sessionKey] = localUser.id;
 
     // 5. Create Response with HttpOnly Cookie
