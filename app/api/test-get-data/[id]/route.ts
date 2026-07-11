@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 
 interface Document {
   id: string;
-  ownerId: string; // This links the doc to the LocalUser.id
+  ownerId: string;
   title: string;
   content: string;
 }
@@ -17,8 +17,9 @@ const FAKE_DOCUMENTS_DB: Record<string, Document> = {
   "doc_2": { id: "doc_2", ownerId: "local_xyz789", title: "Bob's Diary", content: "I love cats" },
 };
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
-  const docId = params.id;
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  
+  const { id: docId } = await params;
 
   // 1. AUTHENTICATION: Who is this?
   const user = await getAuthenticatedUser();
