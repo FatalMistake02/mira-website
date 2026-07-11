@@ -74,6 +74,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "User profile not found" }, { status: 404 });
     }
 
+    // 6. DELETE the token so it cannot be used again (Single Use)
+    const { error: deleteError } = await supabaseAdmin
+      .from("auth_tokens")
+      .delete()
+      .eq("token", token);
+
+    if (deleteError) {
+      console.error("Error deleting token:", deleteError);
+      // We don't necessarily return an error to the user here because they 
+      // are already verified; we just log it for the admin.
+    }
+
     // SUCCESS: Return combined data
     return NextResponse.json({
       success: true,

@@ -22,7 +22,7 @@ const FAKE_USER_DB: Record<string, LocalUser> = {};
 const FAKE_SESSIONS: Record<string, string> = {}; 
 
 const AUTH_SERVER_URL = "https://mira.fatalmistake02.com/api/auth/verify";
-const CLIENT_API_KEY = "test_key_123";
+const CLIENT_API_KEY = "mira_a9dcf802fbfa9caed71aa34f4d591247d3bbb8ce4e6ee19377335b8c81cdb3c2";
 
 export async function POST(req: Request) {
   try {
